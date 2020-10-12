@@ -1,11 +1,12 @@
 package com.mqredis.test_helper;
 
 import com.mqredis.api.GwMessage;
-import com.mqredis.api.GwMessageProducer;
+import com.mqredis.api.GwMessageQueue;
+import com.mqredis.api.GwQueueException;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ShortGwMessageProducer implements GwMessageProducer {
+public class ShortGwMessageProducer {
     private long session;
     private AtomicInteger msgNumber;
     private int cntToProduce;
@@ -13,12 +14,12 @@ public class ShortGwMessageProducer implements GwMessageProducer {
     public ShortGwMessageProducer(long session) {
         this.session = session;
         this.msgNumber = new AtomicInteger(0);
-        this.cntToProduce = 100;
     }
 
-    public ShortGwMessageProducer setCntToProduce(int count) {
-        this.cntToProduce = count;
-        return this;
+    public void produce(int count, GwMessageQueue queue) throws GwQueueException {
+        for (int i = 0; i<count; i++) {
+            queue.tryPut(this.getMessage());
+        }
     }
 
     public ShortGwMessageProducer setSession(long session) {
@@ -26,12 +27,8 @@ public class ShortGwMessageProducer implements GwMessageProducer {
         return this;
     }
 
-    public GwMessage produce() {
+    public GwMessage getMessage() {
         int n = this.msgNumber.getAndIncrement();
-        if (n > this.cntToProduce) {
-            System.out.println("Done producing " + n + " messages");
-            return null;
-        }
         return new GwMessage(this.session, "msg:" + n);
     }
 }

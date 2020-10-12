@@ -10,32 +10,40 @@ public class NaiveGwMQ implements GwMessageQueue {
 
     private int capacity;
 
-    private LinkedBlockingQueue<GwMessage> myQueue;
+    private LinkedBlockingQueue<GwMessage> q;
 
     public NaiveGwMQ(int capacity) {
         this.capacity = capacity;
-        this.myQueue = new LinkedBlockingQueue<GwMessage>(capacity);
+        this.q = new LinkedBlockingQueue<GwMessage>(capacity);
     }
 
-    public void offer(GwMessage msg) throws GwQueueException {
-        if (!this.myQueue.offer(msg)) {
+    public void tryPut(GwMessage msg) throws GwQueueException {
+        if (!this.q.offer(msg)) {
             throw new GwQueueException("Error: Queue Full");
         }
     }
 
-    public GwMessage poll() {
-        return this.myQueue.poll();
+    public GwMessage tryGet() {
+        return this.q.poll();
+    }
+
+    public void blockingPut(GwMessage msg) throws GwQueueException, InterruptedException {
+        this.q.put(msg);
+    }
+
+    public GwMessage blockingGet() throws GwQueueException, InterruptedException {
+        return this.q.take();
     }
 
     public long size() throws GwQueueException {
-        return this.myQueue.size();
+        return this.q.size();
     }
 
     public long capacityLeft() throws GwQueueException {
-        return this.capacity - this.myQueue.size();
+        return this.capacity - this.q.size();
     }
 
     public boolean empty() throws GwQueueException {
-        return this.myQueue.isEmpty();
+        return this.q.isEmpty();
     }
 }

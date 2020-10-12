@@ -1,4 +1,6 @@
-package com.mqredis.api;
+package com.mqredis.test_helper;
+
+import com.mqredis.api.GwMessageQueue;
 
 public interface GwMessageProducerPool {
 

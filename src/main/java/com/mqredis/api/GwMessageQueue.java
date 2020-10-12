@@ -2,9 +2,13 @@ package com.mqredis.api;
 
 public interface GwMessageQueue {
 
-    void offer(GwMessage msg) throws GwQueueException;
+    void tryPut(GwMessage msg) throws GwQueueException;
 
-    GwMessage poll() throws GwQueueException;
+    GwMessage tryGet() throws GwQueueException;
+
+    void blockingPut(GwMessage msg) throws GwQueueException, InterruptedException;
+
+    GwMessage blockingGet() throws GwQueueException, InterruptedException;
 
     long size() throws GwQueueException;
 
