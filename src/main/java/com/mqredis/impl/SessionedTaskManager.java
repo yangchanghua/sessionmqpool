@@ -85,6 +85,7 @@ public class SessionedTaskManager {
     }
 
     private void submit(Long session, SessionMessageQueue queue) {
+        System.out.println("manager submitting " + session);
         Future<?> task = this.executorService.submit(new MessageConsumerTask(session, this.consumer, queue));
     }
 
@@ -103,6 +104,7 @@ public class SessionedTaskManager {
         }
 
         public void run() {
+            System.out.println("Worker consuming session " + session);
             while(true) {
                 GwMessage msg = this.queue.q.poll();
                 if (msg == null) {

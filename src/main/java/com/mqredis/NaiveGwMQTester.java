@@ -3,29 +3,32 @@ package com.mqredis;
 import com.mqredis.api.*;
 import com.mqredis.impl.GwMessageSingleQueue;
 import com.mqredis.impl.SessionAwareGwMessageConsumerPool;
-import com.mqredis.impl.SessionLessGwMessageConsumerPool;
 import com.mqredis.test_helper.*;
 
 public class NaiveGwMQTester {
 
     public void testOnePOneC() {
-        GwMessageConsumer consumer = new ShortGwMessageConsumer();
+        GwMessageConsumer consumer = new SleepingGwMessageConsumer();
         GwMessageQueue queue = new GwMessageSingleQueue(100000);
-        ShortGwMessageProducer producer = new ShortGwMessageProducer(queue);
         final GwMessageRepository repository = InMemoryGwMessageRepository.getInstance();
 //        final GwMessageConsumerPool consumerPool = new SessionLessGwMessageConsumerPool();
-        final GwMessageConsumerPool consumerPool = new SessionAwareGwMessageConsumerPool(8, 20);
+        final GwMessageConsumerPool consumerPool =
+                new SessionAwareGwMessageConsumerPool(3, 3);
         consumerPool.start(consumer, queue);
 
-        int countOfSessions = 100;
-        int countPerSession = 1000;
+        int countOfSessions = 4;
+        int countPerSession = 4;
+        GwMessageWithTimeProducer producer = new GwMessageWithTimeProducer(queue, 0);
+        GwMessageWithTimeProducer longTaskProducer = new GwMessageWithTimeProducer(queue, 1000);
+
         try {
+            longTaskProducer.produce(2, 1);
             producer.produce(countOfSessions, countPerSession);
         } catch (GwQueueException e) {
             e.printStackTrace();
         }
         try {
-            Thread.sleep(1000);
+            Thread.sleep(4000);
             consumerPool.shutdown();
             consumerPool.waitTerminatedForMillis(3000);
         } catch (InterruptedException e) {
@@ -33,9 +36,8 @@ public class NaiveGwMQTester {
         }
         for (int i = 0; i<countOfSessions; i++) {
             int cnt = repository.countOfMessagesForSession(i);
-            assert (cnt == countPerSession);
+            System.out.println("msg in for session  " + i + ": " + cnt);
         }
-//        System.out.println("msg in repo: " + repository.countOfMessagesForSession(0));
     }
 
     public static void main(String[] args) {

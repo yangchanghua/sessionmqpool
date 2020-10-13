@@ -9,11 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ShortGwMessageProducer implements GwMessageProducer {
+public class GwMessageWithTimeProducer implements GwMessageProducer {
     private final GwMessageQueue queue;
+    private final int taskTime;
 
-    public ShortGwMessageProducer(GwMessageQueue queue) {
+    public GwMessageWithTimeProducer(GwMessageQueue queue, int taskTime) {
         this.queue = queue;
+        this.taskTime = taskTime;
     }
 
     class MessageProduceTask implements Runnable {
@@ -26,7 +28,13 @@ public class ShortGwMessageProducer implements GwMessageProducer {
         }
         public void run() {
             for (int i = 0; i < count; i++) {
-                GwMessage msg = new GwMessage(this.session, this.session + ":" + i);
+                String data;
+                if (taskTime > 0) {
+                    data = this.session + ":{long:" + taskTime + "}" + i;
+                } else {
+                    data = this.session + ":" + i;
+                }
+                GwMessage msg = new GwMessage(this.session, data);
                 try {
                     queue.tryPut(msg);
                 } catch (GwQueueException e) {
