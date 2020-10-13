@@ -9,15 +9,18 @@ import com.mqredis.test_helper.*;
 public class NaiveGwMQTester {
 
     public void testOnePOneC() {
-        ShortGwMessageProducer producer = new ShortGwMessageProducer(0);
         GwMessageConsumer consumer = new ShortGwMessageConsumer();
-        GwMessageQueue queue = new GwMessageSingleQueue(100);
+        GwMessageQueue queue = new GwMessageSingleQueue(100000);
+        ShortGwMessageProducer producer = new ShortGwMessageProducer(queue);
         final GwMessageRepository repository = InMemoryGwMessageRepository.getInstance();
 //        final GwMessageConsumerPool consumerPool = new SessionLessGwMessageConsumerPool();
         final GwMessageConsumerPool consumerPool = new SessionAwareGwMessageConsumerPool(8, 20);
         consumerPool.start(consumer, queue);
+
+        int countOfSessions = 100;
+        int countPerSession = 1000;
         try {
-            producer.produce(100, queue);
+            producer.produce(countOfSessions, countPerSession);
         } catch (GwQueueException e) {
             e.printStackTrace();
         }
@@ -28,7 +31,11 @@ public class NaiveGwMQTester {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("msg in repo: " + repository.countOfMessagesForSession(0));
+        for (int i = 0; i<countOfSessions; i++) {
+            int cnt = repository.countOfMessagesForSession(i);
+            assert (cnt == countPerSession);
+        }
+//        System.out.println("msg in repo: " + repository.countOfMessagesForSession(0));
     }
 
     public static void main(String[] args) {
