@@ -1,4 +1,4 @@
-package com.mqredis.serealized;
+package com.mqredis.impl;
 
 import com.mqredis.api.GwMessage;
 import com.mqredis.api.GwMessageQueue;
@@ -6,13 +6,13 @@ import com.mqredis.api.GwQueueException;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class NaiveGwMQ implements GwMessageQueue {
+public class GwMessageSingleQueue implements GwMessageQueue {
 
     private int capacity;
 
     private LinkedBlockingQueue<GwMessage> q;
 
-    public NaiveGwMQ(int capacity) {
+    public GwMessageSingleQueue(int capacity) {
         this.capacity = capacity;
         this.q = new LinkedBlockingQueue<GwMessage>(capacity);
     }

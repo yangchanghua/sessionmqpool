@@ -1,14 +1,15 @@
-package com.mqredis.serealized;
+package com.mqredis.impl;
 
 import com.mqredis.api.*;
 
 import java.util.concurrent.*;
 
-public class SingleThreadGwMessageConsumerPool implements GwMessageConsumerPool {
+public class SessionLessGwMessageConsumerPool implements GwMessageConsumerPool {
 
     private GwMessageConsumer consumer;
     private GwMessageQueue queue;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = new ThreadPoolExecutor(8, 100, 10, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>());
     private Future<Integer> task;
 
     class ConsumerTask implements Runnable {
@@ -38,8 +39,8 @@ public class SingleThreadGwMessageConsumerPool implements GwMessageConsumerPool 
     }
 
     public void shutdown() {
-        this.task.cancel(true);
         this.executorService.shutdown();
+        this.task.cancel(true);
     }
 
     public boolean waitTerminatedForMillis(long timeout) throws InterruptedException {

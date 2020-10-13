@@ -1,8 +1,9 @@
 package com.mqredis;
 
 import com.mqredis.api.*;
-import com.mqredis.serealized.NaiveGwMQ;
-import com.mqredis.serealized.SingleThreadGwMessageConsumerPool;
+import com.mqredis.impl.GwMessageSingleQueue;
+import com.mqredis.impl.SessionAwareGwMessageConsumerPool;
+import com.mqredis.impl.SessionLessGwMessageConsumerPool;
 import com.mqredis.test_helper.*;
 
 public class NaiveGwMQTester {
@@ -10,9 +11,10 @@ public class NaiveGwMQTester {
     public void testOnePOneC() {
         ShortGwMessageProducer producer = new ShortGwMessageProducer(0);
         GwMessageConsumer consumer = new ShortGwMessageConsumer();
-        GwMessageQueue queue = new NaiveGwMQ(100);
+        GwMessageQueue queue = new GwMessageSingleQueue(100);
         final GwMessageRepository repository = InMemoryGwMessageRepository.getInstance();
-        final GwMessageConsumerPool consumerPool = new SingleThreadGwMessageConsumerPool();
+//        final GwMessageConsumerPool consumerPool = new SessionLessGwMessageConsumerPool();
+        final GwMessageConsumerPool consumerPool = new SessionAwareGwMessageConsumerPool(8, 20);
         consumerPool.start(consumer, queue);
         try {
             producer.produce(100, queue);
