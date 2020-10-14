@@ -16,4 +16,6 @@ public interface GwMessageQueue {
 
     boolean empty() throws GwQueueException;
 
+    void clear() throws GwQueueException;
+
 }

@@ -44,6 +44,10 @@ public class InMemoryGwMessageRepository implements GwMessageRepository {
     }
 
     public int countOfMessagesForSession(long session) {
-        return this.db.get(session).size();
+        ConcurrentLinkedQueue<GwMessage> q = this.db.get(session);
+        if (q == null) {
+            return 0;
+        }
+        return q.size();
     }
 }

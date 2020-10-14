@@ -46,4 +46,8 @@ public class GwMessageSingleQueue implements GwMessageQueue {
     public boolean empty() throws GwQueueException {
         return this.q.isEmpty();
     }
+
+    public void clear() throws GwQueueException {
+
+    }
 }
